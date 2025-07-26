@@ -17,6 +17,7 @@ A modern school management platform built with React, Vite, Tailwind CSS, and No
 
 ## Screenshots
 
+
 ### Login Page
 ![Login](screenshots/login.png)
 
