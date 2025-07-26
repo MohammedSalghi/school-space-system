@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BookOpen, UserCheck, TrendingUp, Calendar, Bell } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -64,6 +64,59 @@ const Dashboard = () => {
       color: 'bg-orange-500'
     }
   ];
+
+  // Modal state
+  const [modal, setModal] = useState('');
+  const [studentForm, setStudentForm] = useState({ name: '', age: '', className: '' });
+  const [classForm, setClassForm] = useState({ className: '', teacher: '' });
+  const [meetingForm, setMeetingForm] = useState({ topic: '', time: '' });
+  const [report, setReport] = useState(null);
+  const [message, setMessage] = useState('');
+
+  // Handlers
+  const handleStudentSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const res = await fetch('http://localhost:5001/api/student', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(studentForm)
+    });
+    const data = await res.json();
+    setMessage(data.message);
+    if (res.ok) setModal('');
+  };
+  const handleClassSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const res = await fetch('http://localhost:5001/api/class', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(classForm)
+    });
+    const data = await res.json();
+    setMessage(data.message);
+    if (res.ok) setModal('');
+  };
+  const handleMeetingSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const res = await fetch('http://localhost:5001/api/meeting', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(meetingForm)
+    });
+    const data = await res.json();
+    setMessage(data.message);
+    if (res.ok) setModal('');
+  };
+  const handleReport = async () => {
+    setMessage('');
+    const res = await fetch('http://localhost:5001/api/report');
+    const data = await res.json();
+    setReport(data);
+    setModal('report');
+  };
 
   return (
     <div className="space-y-6">
@@ -198,18 +251,65 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors duration-200">
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors duration-200" onClick={() => setModal('student')}>
               Add New Student
             </button>
-            <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors duration-200">
+            <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors duration-200" onClick={() => setModal('class')}>
               Create Class
             </button>
-            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition-colors duration-200">
+            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition-colors duration-200" onClick={handleReport}>
               Generate Report
             </button>
-            <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 px-4 rounded-lg transition-colors duration-200">
+            <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 px-4 rounded-lg transition-colors duration-200" onClick={() => setModal('meeting')}>
               Schedule Meeting
             </button>
+            {/* Modals */}
+            {modal === 'student' && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onSubmit={handleStudentSubmit}>
+                  <h2 className="text-xl font-bold mb-4">Add New Student</h2>
+                  <input type="text" placeholder="Name" className="w-full mb-2 p-2 border rounded" value={studentForm.name} onChange={e => setStudentForm(f => ({ ...f, name: e.target.value }))} required />
+                  <input type="number" placeholder="Age" className="w-full mb-2 p-2 border rounded" value={studentForm.age} onChange={e => setStudentForm(f => ({ ...f, age: e.target.value }))} required />
+                  <input type="text" placeholder="Class Name" className="w-full mb-2 p-2 border rounded" value={studentForm.className} onChange={e => setStudentForm(f => ({ ...f, className: e.target.value }))} required />
+                  <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded">Add</button>
+                  <button type="button" className="ml-2 text-gray-600" onClick={() => setModal('')}>Cancel</button>
+                  {message && <div className="mt-2 text-green-600">{message}</div>}
+                </form>
+              </div>
+            )}
+            {modal === 'class' && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onSubmit={handleClassSubmit}>
+                  <h2 className="text-xl font-bold mb-4">Create Class</h2>
+                  <input type="text" placeholder="Class Name" className="w-full mb-2 p-2 border rounded" value={classForm.className} onChange={e => setClassForm(f => ({ ...f, className: e.target.value }))} required />
+                  <input type="text" placeholder="Teacher" className="w-full mb-2 p-2 border rounded" value={classForm.teacher} onChange={e => setClassForm(f => ({ ...f, teacher: e.target.value }))} required />
+                  <button type="submit" className="bg-green-600 text-white py-2 px-4 rounded">Create</button>
+                  <button type="button" className="ml-2 text-gray-600" onClick={() => setModal('')}>Cancel</button>
+                  {message && <div className="mt-2 text-green-600">{message}</div>}
+                </form>
+              </div>
+            )}
+            {modal === 'meeting' && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onSubmit={handleMeetingSubmit}>
+                  <h2 className="text-xl font-bold mb-4">Schedule Meeting</h2>
+                  <input type="text" placeholder="Topic" className="w-full mb-2 p-2 border rounded" value={meetingForm.topic} onChange={e => setMeetingForm(f => ({ ...f, topic: e.target.value }))} required />
+                  <input type="datetime-local" placeholder="Time" className="w-full mb-2 p-2 border rounded" value={meetingForm.time} onChange={e => setMeetingForm(f => ({ ...f, time: e.target.value }))} required />
+                  <button type="submit" className="bg-orange-600 text-white py-2 px-4 rounded">Schedule</button>
+                  <button type="button" className="ml-2 text-gray-600" onClick={() => setModal('')}>Cancel</button>
+                  {message && <div className="mt-2 text-green-600">{message}</div>}
+                </form>
+              </div>
+            )}
+            {modal === 'report' && report && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                  <h2 className="text-xl font-bold mb-4">Report</h2>
+                  <pre className="bg-gray-100 p-2 rounded text-xs max-h-60 overflow-auto">{JSON.stringify(report, null, 2)}</pre>
+                  <button type="button" className="mt-2 text-gray-600" onClick={() => setModal('')}>Close</button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

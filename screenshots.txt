@@ -1,0 +1,12 @@
+Screenshots included in the project:
+
+1. Login Page
+2. Signup Page
+3. Dashboard (Quick Actions, Reports, Charts)
+4. Student Management
+5. Class Management
+6. Teacher Management
+7. Reports & Analytics
+8. Schedule Meeting Modal
+
+To view these, see the attached images in your workspace or documentation. You can add these images to a `screenshots/` folder for easy reference.
